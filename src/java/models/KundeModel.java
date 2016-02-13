@@ -25,16 +25,8 @@ public class KundeModel implements Serializable{
     @Inject
     private Persistence db;
 
-    public void neuerKunde(Kunde kunde) throws Exception {
-        try {
-            db.persist(kunde);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        } finally {
-            if (db.getManager() != null) {
-                db.getManager().close();
-            }
-        }
+    public void neuerKunde(Kunde kunde){
+        db.persist(kunde);
     }
     
     public KundeModel(){
@@ -62,8 +54,44 @@ public class KundeModel implements Serializable{
         }
     }
     
-    
     public void kundenBearbeiten(Kunde kunde){
         db.merge(kunde);
     }
+    
+    public String kundenSuchen(long id){
+        if(db.findAlleKunden().isEmpty()){
+            return "Es existiert noch kein Kunde.";
+        }
+        else if(db.findKundeById(id) == null){
+            return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")";
+        }
+        else{
+            return db.findKundeById(id).toString();
+        }
+    }
+    
+    public String checkOut(long id){
+        if(db.findAlleKunden().isEmpty()){
+            return "Es existiert noch kein Kunde.";
+        }
+        else if(db.findKundeById(id) == null){
+            return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")";
+        }
+        else if(!db.findKundeById(id).isEingecheckt()){
+            return "Kunde ist nicht eingecheckt.";
+        }
+        else{
+            db.auschecken(id);
+            return "Kunde erfolgreich ausgecheckt";
+        }
+    }
+
+    public Persistence getDb() {
+        return db;
+    }
+
+    public void setDb(Persistence db) {
+        this.db = db;
+    }
+    
 }
