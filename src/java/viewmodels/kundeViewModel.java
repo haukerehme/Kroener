@@ -11,7 +11,7 @@ import entities.Kunde;
 import java.io.Serializable;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import models.KundeModel;
@@ -21,7 +21,7 @@ import models.KundeModel;
  * @author Katha
  */
 @Named(value="kvm")
-@RequestScoped
+@SessionScoped
 public class kundeViewModel implements Serializable{
     private long id;
     private String vorname;
@@ -39,10 +39,87 @@ public class kundeViewModel implements Serializable{
     private String suchErgebnis;
     @Inject
     private KundeModel kundemodel;
-    @EJB
-    private Persistence persistence;
     
     public kundeViewModel(){
+    }
+    
+    public String kundenSuchen(long id){
+        this.id = id;
+        this.suchErgebnis = kundemodel.kundenSuchen(id);
+        zuruecksetzen();
+        return konstanten.Navigation.SUCHERGEBNIS;
+    }
+    
+    public String zurBearbeitung(long id){
+        setThisValues(kundemodel.getDb().findKundeById(id));
+        return konstanten.Navigation.KUNDENBEARBEITEN;
+    }
+    
+    public String kundenBearbeiten(){
+        Kunde k = kundemodel.getDb().findKundeById(id);
+        setKundeValues(k);
+        kundemodel.kundenBearbeiten(k);
+        zuruecksetzen();
+        return konstanten.Navigation.EINGECHECKT;
+    }
+    
+    public String neuerKunde(){
+        Kunde k = new Kunde(vorname,nachname,strasse,ort,hausnummer,postleitzahl,bemerkungen,vertragsart,vertragslaufzeit,telefonnummer,false);
+        kundemodel.neuerKunde(k);
+        zuruecksetzen();
+        return konstanten.Navigation.KUNDEANGELEGT;
+    }
+    
+    
+    public void setThisValues(Kunde k){
+        id = k.getId();
+        vorname = k.getVorname();
+        nachname = k.getNachname();
+        strasse = k.getStrasse();
+        ort = k.getOrt();
+        hausnummer = k.getHausnummer();
+        postleitzahl = k.getPostleitzahl();
+        telefonnummer = k.getTelefonnummer();
+        bemerkungen = k.getBemerkungen();
+        eingecheckt = k.isEingecheckt();
+        vertragsart = k.getVertragsart();
+        vertragslaufzeit = k.getVertragslaufzeit();
+    }
+    
+    public void setKundeValues(Kunde k){
+        k.setVorname(vorname);
+        k.setNachname(nachname);
+        k.setStrasse(strasse);
+        k.setOrt(ort);
+        k.setHausnummer(hausnummer);
+        k.setPostleitzahl(postleitzahl);
+        k.setTelefonnummer(telefonnummer);
+        k.setBemerkungen(bemerkungen);
+        k.setEingecheckt(false);
+        k.setVertragsart(vertragsart);
+        k.setVertragslaufzeit(vertragslaufzeit);
+    }
+    
+    public void zuruecksetzen(){
+        vorname = "";
+        nachname = "";
+        strasse = "";
+        ort = "";
+        hausnummer = -1;
+        postleitzahl = -1;
+        telefonnummer = -1;
+        bemerkungen = "";
+        eingecheckt = false;
+        vertragsart = "";
+        vertragslaufzeit = -1;
+    }
+   
+    public KundeModel getKundemodel() {
+        return kundemodel;
+    }
+
+    public void setKundemodel(KundeModel kundemodel) {
+        this.kundemodel = kundemodel;
     }
 
     public String getSuchErgebnis() {
@@ -168,44 +245,14 @@ public class kundeViewModel implements Serializable{
     }
     
     public String checkIn(){
-        if(persistence.findAlleKunden().isEmpty()){
-            this.setEincheckNachricht("Es existiert noch kein Kunde.");
-            System.out.println("Es existiert noch kein Kunde.");
-        }
-        else if(this.persistence.findKundeById(id) == null){
-            this.setEincheckNachricht("Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")");
-            System.out.println("Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")");
-        }
-        else if(this.persistence.findKundeById(id).isEingecheckt()){
-            this.setEincheckNachricht("Kunde ist bereits eingecheckt.");
-            System.out.println("Kunde ist bereits eingecheckt.");
-        }
-        else{
-            this.persistence.einchecken(id);
-            this.setEincheckNachricht("Kunde erfolgreich eingecheckt");
-            System.out.println("Kunde erfolgreich eingecheckt");
-        }
+        this.eincheckNachricht = kundemodel.checkIn(id);
+        zuruecksetzen();
         return konstanten.Navigation.EINGECHECKT;
     }
     
     public String checkOut(){
-        if(persistence.findAlleKunden().isEmpty()){
-            this.setEincheckNachricht("Es existiert noch kein Kunde.");
-            System.out.println("Es existiert noch kein Kunde.");
-        }
-        else if(this.persistence.findKundeById(id) == null){
-            this.setEincheckNachricht("Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")");
-            System.out.println("Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")");
-        }
-        else if(!this.persistence.findKundeById(id).isEingecheckt()){
-            this.setEincheckNachricht("Kunde ist nicht eingecheckt.");
-            System.out.println("Kunde ist nicht eingecheckt.");
-        }
-        else{
-            this.persistence.auschecken(id);
-            this.setEincheckNachricht("Kunde erfolgreich ausgecheckt");
-            System.out.println("Kunde erfolgreich ausgecheckt");
-        }
+        this.eincheckNachricht = kundemodel.checkOut(id);
+        zuruecksetzen();
         return konstanten.Navigation.EINGECHECKT;
     }
     
@@ -222,101 +269,8 @@ public class kundeViewModel implements Serializable{
     }
     
     public String zurStartseite(){
+        zuruecksetzen();
         return konstanten.Navigation.STARTSEITE;
     }
-    
-    public String kundenSuchen(){
-        if(persistence.findAlleKunden().isEmpty()){
-            this.setSuchErgebnis("Es existiert noch kein Kunde.");
-            System.out.println("Es existiert noch kein Kunde.");
-        }
-        else if(this.persistence.findKundeById(id) == null){
-            this.setSuchErgebnis("Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")");
-            System.out.println("Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")");
-        }
-        else{
-            this.setSuchErgebnis(this.persistence.findKundeById(id).toString());
-            System.out.println(this.persistence.findKundeById(id).toString());
-        }
-        return konstanten.Navigation.SUCHERGEBNIS;
-    }
-    
-    public String zurBearbeitung(){
-        return konstanten.Navigation.KUNDENBEARBEITEN;
-    }
-    
-    public String kundenBearbeiten(){
-        Kunde k = persistence.findKundeById(id);
-        k.setVorname(vorname);
-        k.setNachname(nachname);
-        k.setStrasse(strasse);
-        k.setOrt(ort);
-        k.setHausnummer(hausnummer);
-        k.setPostleitzahl(postleitzahl);
-        k.setBemerkungen(bemerkungen);
-        k.setEingecheckt(false);
-        k.setVertragsart(vertragsart);
-        k.setVertragslaufzeit(vertragslaufzeit);
-        persistence.merge(k);
-        return konstanten.Navigation.EINGECHECKT;
-    }
-    
-    public String neuerKunde(){
-        
-        Kunde k = new Kunde();
-        
-       /* k.setVorname("hauke");
-        k.setNachname("re");
-        k.setStrasse("er");
-        k.setOrt("bbb");
-        k.setHausnummer(2);
-        k.setPostleitzahl(2343);
-        k.setBemerkungen("sd");
-        k.setEingecheckt(false);
-        k.setVertragsart("sdfds");
-        k.setVertragslaufzeit(12);*/
-        
-        k.setVorname(vorname);
-        k.setNachname(nachname);
-        k.setStrasse(strasse);
-        k.setOrt(ort);
-        k.setHausnummer(hausnummer);
-        k.setPostleitzahl(postleitzahl);
-        k.setBemerkungen(bemerkungen);
-        k.setEingecheckt(false);
-        k.setVertragsart(vertragsart);
-        k.setVertragslaufzeit(vertragslaufzeit);
-        
-        persistence.persist(k);
-        
-        
-        
-        
-        
-        /*try{
-        kundemodel.neuerKunde(k);
-        } catch(Exception e){
-            
-            System.out.println("knn Kunden nicht erstellen"+ e.getMessage());
-        }*/
-        zuruecksetzen();
-        return konstanten.Navigation.KUNDEANGELEGT;
-    }
-    
-    public void zuruecksetzen(){
-        this.setVorname("");
-        this.setNachname("");
-        this.setStrasse("");
-        this.setOrt("");
-        this.setHausnummer(0);
-        this.setPostleitzahl(0);
-        this.setBemerkungen("");
-        this.setEingecheckt(false);
-        this.setVertragsart("");
-        this.setVertragslaufzeit(0);
-        this.setEincheckNachricht("");
-    }
-    
-   
 }
 

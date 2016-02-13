@@ -10,7 +10,7 @@
         <h:form>
             <h:outputText id="KundensucheseiteKundennummerAusgabe" value="Kundennummer eingeben: " />
             <h:inputText id="KundensucheseiteKundennummerEingabefeld" value="#{kvm.id}"/>
-            <h:commandButton id="KundensucheseiteSucheButton" value="Suchen" action="#{kvm.kundenSuchen()}" />
+            <h:commandButton id="KundensucheseiteSucheButton" value="Suchen" action="#{kvm.kundenSuchen(kvm.id)}" />
             <br />
             <h:commandLink id="KundensucheseiteStartseiteLink" value="Zum Hauptmenü" action="#{kvm.zurStartseite()}" />
         </h:form>
