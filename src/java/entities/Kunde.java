@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.validation.constraints.*;
 
 /**
  *
@@ -23,24 +23,36 @@ public class Kunde implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     //@Min(10000)
     private Long id;
-    @OneToOne
-    private Schrank schrank = null;
+ 
+    private int kundennummer;
+    
     private String vorname;
+    
     private String nachname;
+    
     private String strasse;
+    
     private String ort;
-    private int hausnummer;
-    private int postleitzahl;
+    
+    private String hausnummer;
+    
+    private String postleitzahl;
+    
     private String bemerkungen;
+    
     private String vertragsart;
+    
     private int vertragslaufzeit;
-    private long telefonnummer;
+    
+    private String telefonnummer;
+    
     private boolean eingecheckt;
     
     public Kunde(){
     }
 
-    public Kunde(String vorname, String nachname, String strasse, String ort, int hausnummer, int postleitzahl, String bemerkungen, String vertragsart, int vertragslaufzeit, long telefonnummer, boolean eingecheckt) {
+    public Kunde(int kundennummer, String vorname, String nachname, String strasse, String ort, String hausnummer, String postleitzahl, String bemerkungen, String vertragsart, int vertragslaufzeit, String telefonnummer, boolean eingecheckt) {
+        this.kundennummer = kundennummer;
         this.vorname = vorname;
         this.nachname = nachname;
         this.strasse = strasse;
@@ -53,9 +65,19 @@ public class Kunde implements Serializable {
         this.telefonnummer = telefonnummer;
         this.eingecheckt = eingecheckt;
     }
-    
+
+   
+
     
 
+    public int getKundennummer() {
+        return kundennummer;
+    }
+
+    public void setKundennummer(int kundennummer) {
+        this.kundennummer = kundennummer;
+    }
+    
     public String getVorname() {
         return vorname;
     }
@@ -88,19 +110,19 @@ public class Kunde implements Serializable {
         this.ort = ort;
     }
 
-    public int getHausnummer() {
+    public String getHausnummer() {
         return hausnummer;
     }
 
-    public void setHausnummer(int hausnummer) {
+    public void setHausnummer(String hausnummer) {
         this.hausnummer = hausnummer;
     }
 
-    public int getPostleitzahl() {
+    public String getPostleitzahl() {
         return postleitzahl;
     }
 
-    public void setPostleitzahl(int postleitzahl) {
+    public void setPostleitzahl(String postleitzahl) {
         this.postleitzahl = postleitzahl;
     }
 
@@ -128,11 +150,11 @@ public class Kunde implements Serializable {
         this.vertragslaufzeit = vertragslaufzeit;
     }
 
-    public long getTelefonnummer() {
+    public String getTelefonnummer() {
         return telefonnummer;
     }
 
-    public void setTelefonnummer(long telefonnummer) {
+    public void setTelefonnummer(String telefonnummer) {
         this.telefonnummer = telefonnummer;
     }
 
@@ -165,7 +187,7 @@ public class Kunde implements Serializable {
 
     @Override
     public String toString() {
-        return "Kunde: " + id + "\n"
+        return "Kunde: " + kundennummer + "\n"
                 + vorname + " " + nachname + "\n"
                 + strasse + " " + hausnummer + ", " + postleitzahl +" "+ ort + "\n"
                 + telefonnummer + "\n"

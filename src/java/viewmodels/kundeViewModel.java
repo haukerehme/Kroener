@@ -6,7 +6,7 @@
 package viewmodels;
 
 
-import db.Persistence;
+import db.KundePersistence;
 import entities.Kunde;
 import java.io.Serializable;
 import java.util.List;
@@ -14,6 +14,11 @@ import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import models.KundeModel;
 import models.SchrankController;
 
@@ -25,47 +30,96 @@ import models.SchrankController;
 @SessionScoped
 public class kundeViewModel implements Serializable{
     private long id;
+    private int kundennummer;
+    
+    
+    @Size(min=2, max=30, message="Der Vorname muss 2-30 Zeichen haben")
+    @Pattern(regexp="^[A-Z][\\s-a-zA-Zéüäöóß]+$", message="Der Vorname muss einen vorangestellten großen Buchstaben haben. Außerdem sind nur die Zeichen a-z,A-Z,é,ü,ä,ö,ó,- und Leerzeichen erlaubt")
     private String vorname;
+    
+    
+    @Size(min=3, max=50, message="Der Nachname muss 3-50 Zeichen haben")
+    @Pattern(regexp="^[A-Z][\\s-a-zA-Zéüäöóß]+$", message="Der Nachname muss einen vorangestellten großen Buchstaben haben. Außerdem sind nur die Zeichen a-z,A-Z,é,ü,ä,ö,ó,- und Leerzeichen erlaubt")
     private String nachname;
+    
+    
+    @Size(min=3, max=50, message="Die Straße muss 3-50 Zeichen haben")
+    @Pattern(regexp="^[A-Z][\\s-a-zA-Zéüäöóß]+$", message="Die Straße muss einen vorangestellten großen Buchstaben haben. Außerdem sind nur die Zeichen a-z,A-Z,é,ü,ä,ö,ó,- und Leerzeichen erlaubt")
     private String strasse;
+    
+    @NotNull
+    @Size(min=2, max=50, message="Der Ort muss 2-50 Zeichen haben")
+    @Pattern(regexp="^[A-Z][\\s-a-zA-Zéüäöóß]+$", message="Der Ort muss einen vorangestellten großen Buchstaben haben. Außerdem sind nur die Zeichen a-z,A-Z,é,ü,ä,ö,ó,- und Leerzeichen erlaubt")
     private String ort;
-    private int hausnummer;
-    private int postleitzahl;
+    
+    
+    @Size(min=1, max=16, message="Die Hausnummer muss 1-16 Zeichen haben")
+    private String hausnummer;
+
+    @Size(min=4, max=7, message="Die Postleitzahl muss 4-7 Zeichen haben")
+    private String postleitzahl;
+    
     private String bemerkungen;
+    
+    @Size(min=1, max=30, message="Die Vertragsart muss 1-30 Zeichen haben")
     private String vertragsart;
+    
+    @Min(value = 1, message="Vertragslaufzeit muss mindestens 1 sein.")
+    @Max(value = 36, message="Vertragslaufzeit darf höchstens 36 sein.")
     private int vertragslaufzeit;
-    private long telefonnummer;
+    
+    @Size(min=4, max=30, message="Die Telefonnummer muss aus 4-30 Zeichen bestehen")
+    @Pattern(regexp="^[0-9]+$",message="Für die Telefonnummer bitte nur Zahlen verwenden")
+    private String telefonnummer;
+    
+    
     private boolean eingecheckt;
+    
+    
     private String eincheckNachricht;
+    
+    
     private String suchErgebnis;
+    
+    
     @Inject
     private KundeModel kundemodel;
     
     public kundeViewModel(){
     }
     
-    public String kundenSuchen(long id){
-        this.id = id;
-        this.suchErgebnis = kundemodel.kundenSuchen(id);
-        zuruecksetzen();
+    public String kundenSuchErgebnis(int kundennummer){
+        this.kundennummer = kundennummer;
+        if(kundemodel.kundenSuchen(kundennummer)!=null){
+            setThisValues(kundemodel.kundenSuchen(kundennummer));
+        }
+        
+        this.suchErgebnis = kundemodel.kundenSuchErgebnis(kundennummer);
+        //zuruecksetzen();
         return konstanten.Navigation.SUCHERGEBNIS;
     }
     
     public String zurBearbeitung(long id){
-        setThisValues(kundemodel.getDb().findKundeById(id));
+        setThisValues(kundemodel.getKundePersistence().findKundeById(id));
         return konstanten.Navigation.KUNDENBEARBEITEN;
     }
     
-    public String kundenBearbeiten(){
-        Kunde k = kundemodel.getDb().findKundeById(id);
+    public String kundenBearbeiten(long id){
+        Kunde k = kundemodel.getKundePersistence().findKundeById(id);
         setKundeValues(k);
         kundemodel.kundenBearbeiten(k);
         zuruecksetzen();
-        return konstanten.Navigation.EINGECHECKT;
+        return konstanten.Navigation.STARTSEITE;
     }
     
-    public String neuerKunde(){
-        Kunde k = new Kunde(vorname,nachname,strasse,ort,hausnummer,postleitzahl,bemerkungen,vertragsart,vertragslaufzeit,telefonnummer,false);
+    public String loeschen(long id){
+        kundemodel.getKundePersistence().remove(kundemodel.getKundePersistence().findKundeById(id));
+        return konstanten.Navigation.STARTSEITE;
+    }
+    
+    public String neuerKunde(){ 
+        int freieKundennummer = kundemodel.freieKundennummer();
+        Kunde k = new Kunde(freieKundennummer,vorname,nachname,strasse,ort,hausnummer,postleitzahl,bemerkungen,vertragsart,vertragslaufzeit,telefonnummer,false);
         kundemodel.neuerKunde(k);
         zuruecksetzen();
         return konstanten.Navigation.KUNDEANGELEGT;
@@ -74,6 +128,7 @@ public class kundeViewModel implements Serializable{
     
     public void setThisValues(Kunde k){
         id = k.getId();
+        kundennummer = k.getKundennummer();
         vorname = k.getVorname();
         nachname = k.getNachname();
         strasse = k.getStrasse();
@@ -88,6 +143,7 @@ public class kundeViewModel implements Serializable{
     }
     
     public void setKundeValues(Kunde k){
+        k.setKundennummer(kundennummer);
         k.setVorname(vorname);
         k.setNachname(nachname);
         k.setStrasse(strasse);
@@ -106,15 +162,25 @@ public class kundeViewModel implements Serializable{
         nachname = "";
         strasse = "";
         ort = "";
-        hausnummer = -1;
-        postleitzahl = -1;
-        telefonnummer = -1;
+        hausnummer = "";
+        postleitzahl = "";
+        telefonnummer = "";
         bemerkungen = "";
         eingecheckt = false;
         vertragsart = "";
         vertragslaufzeit = -1;
     }
+
+    public int getKundennummer() {
+        return kundennummer;
+    }
+
+    public void setKundennummer(int kundennummer) {
+        this.kundennummer = kundennummer;
+    }
    
+    
+    
     public KundeModel getKundemodel() {
         return kundemodel;
     }
@@ -171,19 +237,19 @@ public class kundeViewModel implements Serializable{
         this.ort = ort;
     }
 
-    public int getHausnummer() {
+    public String getHausnummer() {
         return hausnummer;
     }
 
-    public void setHausnummer(int hausnummer) {
+    public void setHausnummer(String hausnummer) {
         this.hausnummer = hausnummer;
     }
 
-    public int getPostleitzahl() {
+    public String getPostleitzahl() {
         return postleitzahl;
     }
 
-    public void setPostleitzahl(int postleitzahl) {
+    public void setPostleitzahl(String postleitzahl) {
         this.postleitzahl = postleitzahl;
     }
 
@@ -211,11 +277,11 @@ public class kundeViewModel implements Serializable{
         this.vertragslaufzeit = vertragslaufzeit;
     }
 
-    public long getTelefonnummer() {
+    public String getTelefonnummer() {
         return telefonnummer;
     }
 
-    public void setTelefonnummer(long telefonnummer) {
+    public void setTelefonnummer(String telefonnummer) {
         this.telefonnummer = telefonnummer;
     }
 
@@ -242,30 +308,28 @@ public class kundeViewModel implements Serializable{
     
     
     public String zumCheckin(){
+        kundemodel.initSchrankController();
         return konstanten.Navigation.CHECKIN;
     }
     
-    public String checkIn(long id){
+    public String checkIn(int kundennummer){
         
-        //if(SchrankController.getInstance().einchecken(id) != -1){
-            this.eincheckNachricht = kundemodel.checkIn(id);
-            zuruecksetzen();
-            return konstanten.Navigation.EINGECHECKT;
-        /*}else{
-            
-            return konstanten.Navigation.EINGECHECKT;
-        }*/
+        
+        this.eincheckNachricht = kundemodel.checkIn(kundennummer);
+        return konstanten.Navigation.EINGECHECKT;
+        
         
         
     }
     
-    public String checkOut(){
+    public String checkOut(long id){
         this.eincheckNachricht = kundemodel.checkOut(id);
         zuruecksetzen();
         return konstanten.Navigation.EINGECHECKT;
     }
     
-    public String zumCheckout(){
+    public String zumCheckout(long id){
+        checkOut(id);
         return konstanten.Navigation.CHECKOUT;
     }
     

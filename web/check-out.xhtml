@@ -10,7 +10,7 @@
         <h:form>
             <h:outputText id="CheckoutseiteKundennummerAusgabe" value="Kundennummer eingeben: " />
             <h:inputText id="CheckoutseiteKundennummerEingabefeld" value="#{kvm.id}"/>
-            <h:commandButton id="CheckoutseiteCheckoutButton" value="Check-Out" action="#{kvm.checkOut()}" />
+            <h:commandButton id="CheckoutseiteCheckoutButton" value="Check-Out" action="#{kvm.checkOut(kvm.id)}" />
             <br />
             <h:commandLink id="CheckoutseiteStartseiteLink" value="Zum Hauptmenü" action="#{kvm.zurStartseite()}" />
         </h:form>

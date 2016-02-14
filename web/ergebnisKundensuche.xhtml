@@ -11,6 +11,10 @@
             <h:outputText id="ErgebniskundensucheseiteKundeAusgabe" value="#{kvm.suchErgebnis}" />
             <br />
             <h:commandButton id="ErgebniskundensucheseiteKundenBearbeitenButton" value="Bearbeiten" action="#{kvm.zurBearbeitung(kvm.id)}" />
+            <br />
+            <h:commandButton id="ErgebniskundensucheseiteKundenBearbeitenLoeschen" value="Löschen" action="#{kvm.loeschen(kvm.id)}" />
+            <br />
+            <br />
             <h:commandLink id="EingechecktseiteStartseiteLink" value="Zum Hauptmenü" action="#{kvm.zurStartseite()}" />
             <br />
         </h:form>

@@ -5,11 +5,12 @@
  */
 package models;
 
-import db.Persistence;
+import db.KundePersistence;
 import entities.Kunde;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -22,38 +23,46 @@ import javax.transaction.UserTransaction;
  */
 @Dependent
 public class KundeModel implements Serializable{
+    @EJB
+    private KundePersistence kundePersistence;
+    
     @Inject
-    private Persistence db;
+    SchrankController schrankController;
 
     public void neuerKunde(Kunde kunde){
-        db.persist(kunde);
+        kundePersistence.persist(kunde);
     }
     
     public KundeModel(){
     }
     
+    public void initSchrankController(){
+        schrankController.initSchrankList();
+    }
+    
     public List<Kunde> eingecheckteKunden(){
         List<Kunde> ergebnis = new ArrayList<>();
-        for(Kunde k:this.db.findEingecheckteKunden()){
+        for(Kunde k:this.kundePersistence.findEingecheckteKunden()){
             ergebnis.add(k);
         }
         return ergebnis;
     }
     
     
-    public String checkIn(long id){
-        Kunde kunde = this.db.findKundeById(id);
+    public String checkIn(int kundennummer){
+        Kunde kunde = this.kundePersistence.findKundeByKundennummer(kundennummer);
         if(kunde == null){
-            return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")";
+            return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + kundennummer + ")";
         }
         else if(kunde.isEingecheckt()){
             return "Kunde ist bereits eingecheckt";
         }
         else{
-            SchrankController schrankController = SchrankController.getInstance();
-            int schranknummer = schrankController.einchecken(id);
+            //SchrankController schrankController = new SchrankController();
+            
+            int schranknummer = schrankController.einchecken(kundennummer);
             if(schranknummer != -1){
-                this.db.einchecken(id);
+                this.kundePersistence.einchecken(kundennummer);
                 return "Kunde erfolgreich eingecheckt. Schranknummer: " + schranknummer;
             }else{
                 return "Kein Schrank mehr verfügbar";
@@ -62,43 +71,51 @@ public class KundeModel implements Serializable{
     }
     
     public void kundenBearbeiten(Kunde kunde){
-        db.merge(kunde);
+        kundePersistence.merge(kunde);
     }
     
-    public String kundenSuchen(long id){
-        if(db.findAlleKunden().isEmpty()){
+    public String kundenSuchErgebnis(int kundennummer){
+        if(kundePersistence.findAll().isEmpty()){
             return "Es existiert noch kein Kunde.";
         }
-        else if(db.findKundeById(id) == null){
-            return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")";
+        else if(kundePersistence.findKundeByKundennummer(kundennummer) == null){
+            return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + kundennummer + ")";
         }
         else{
-            return db.findKundeById(id).toString();
+            return kundePersistence.findKundeByKundennummer(kundennummer).toString();
         }
     }
     
+    public Kunde kundenSuchen(int kundennummer){
+        return kundePersistence.findKundeByKundennummer(kundennummer);
+    }
+   
     public String checkOut(long id){
-        if(db.findAlleKunden().isEmpty()){
+        if(kundePersistence.findAll().isEmpty()){
             return "Es existiert noch kein Kunde.";
         }
-        else if(db.findKundeById(id) == null){
+        else if(kundePersistence.findKundeById(id) == null){
             return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")";
         }
-        else if(!db.findKundeById(id).isEingecheckt()){
+        else if(!kundePersistence.findKundeById(id).isEingecheckt()){
             return "Kunde ist nicht eingecheckt.";
         }
         else{
-            db.auschecken(id);
+            kundePersistence.auschecken(id);
             return "Kunde erfolgreich ausgecheckt";
         }
     }
 
-    public Persistence getDb() {
-        return db;
+    public KundePersistence getKundePersistence() {
+        return kundePersistence;
     }
 
-    public void setDb(Persistence db) {
-        this.db = db;
+    public void setKundePersistence(KundePersistence kundePersistence) {
+        this.kundePersistence = kundePersistence;
+    }
+    
+    public int freieKundennummer(){
+        return kundePersistence.findFreieKundennummer();
     }
     
 }

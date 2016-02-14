@@ -6,11 +6,13 @@
 package entities;
 
 import java.io.Serializable;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.Null;
 
 /**
  *
@@ -81,7 +83,8 @@ public class Schrank implements Serializable {
         return "Schrank Nr. " + id + " ]";
     }
 
-    public Schrank(int schranknummer, Kunde kunde) {
+    public Schrank(long id,int schranknummer, Kunde kunde) {
+        this.id = id;
         this.schranknummer = schranknummer;
         this.kunde = kunde;
     }

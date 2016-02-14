@@ -16,7 +16,7 @@
             <br />
             <h:outputText id="NeuerkundeseiteNachnameAusgabe" value="Nachname: " />
             <br />
-            <h:inputText id="NeuerkundeseiteNachnameEingabe" value="#{kvm.nachname}" />
+            <h:inputText id="NeuerkundeseiteNachnameEingabe" value="#{kvm.nachname}"  />
             <br />
             <h:outputText id="NeuerkundeseiteStrasseAusgabe" value="Strasse: " />
             <br />
@@ -50,8 +50,9 @@
             <br />
             <h:inputText id="NeuerkundeseiteBemerkungenEingabe" value="#{kvm.bemerkungen}" />
             <br />
-            <h:commandButton id="NeuerkundeseiteUebernehmenButton" value="Übernehmen" action="#{kvm.kundenBearbeiten()}" />
+            <h:commandButton id="NeuerkundeseiteUebernehmenButton" value="Übernehmen" action="#{kvm.kundenBearbeiten(kvm.id)}" />
             <br />
+            
             <h:commandLink id="NeuerkundeseiteStartseiteLink" value="Zum Hauptmenü" action="#{kvm.zurStartseite()}" />
         </h:form>
     </h:body>
