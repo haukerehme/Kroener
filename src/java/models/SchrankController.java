@@ -7,6 +7,7 @@ package models;
 
 import db.Persistence;
 import entities.Schrank;
+import java.io.Serializable;
 import java.util.ArrayList;
 import javax.ejb.EJB;
 
@@ -15,7 +16,7 @@ import javax.ejb.EJB;
  * @author Katha
  */
 
-public class SchrankController{
+public class SchrankController implements Serializable{
     
     private ArrayList<Schrank> schrankList;
     
@@ -27,12 +28,12 @@ public class SchrankController{
     
     
     private SchrankController() {
-        /*schrankList = (ArrayList<Schrank>) persistence.findAlleSchraenke();
+        schrankList = (ArrayList<Schrank>) persistence.findAlleSchraenke();
         if(schrankList.isEmpty()){
             for(int i = 0; i < 50; i++){
                 this.schrankList.add(new Schrank(null));
             }
-        }*/
+        }
     }
     
     public void initSchrankList(){
