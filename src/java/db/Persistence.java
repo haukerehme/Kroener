@@ -6,6 +6,7 @@
 package db;
 
 import entities.Kunde;
+import entities.Schrank;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -59,6 +60,8 @@ public class Persistence {
     
     public void auschecken(long id){
         manager.find(Kunde.class, id).setEingecheckt(false);
+        Schrank auscheckSchrank = findSchrankByKundenId(id);
+        manager.find(Schrank.class, auscheckSchrank).setKunde(null);
         manager.merge(findKundeById(id));
     }
     
@@ -66,5 +69,24 @@ public class Persistence {
         return manager.createQuery("SELECT k FROM Kunde k", Kunde.class).getResultList();
 
     }
+    
+    public void schrankZuweisen(long id, int schrank){
+        manager.find(Schrank.class, schrank).setKunde(manager.find(Kunde.class, id));
+        manager.merge(findKundeById(id));
+    }
+    
+    public List<Schrank> findAlleSchraenke(){
+        return manager.createQuery("SELECT s FROM Schrank s", Schrank.class).getResultList();
+
+    }
+    
+    public Schrank findSchrankByKundenId(long id){
+        return (Schrank) manager.createQuery("SELECT s FROM Schrank s WHERE s.kunde.id := id").getSingleResult();
+    }
+    
+    public void initSchranknummern(){
+        
+    }
+    
     
 }

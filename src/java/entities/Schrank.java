@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -21,7 +22,32 @@ public class Schrank implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    
+    private int schranknummer;
+    
+    @OneToOne
+    private Kunde kunde;
 
+    public int getSchranknummer() {
+        return schranknummer;
+    }
+
+    public void setSchranknummer(int schranknummer) {
+        this.schranknummer = schranknummer;
+    }
+
+    public Schrank(Kunde kunde) {
+        this.kunde = kunde;
+    }
+
+    public Kunde getKunde() {
+        return kunde;
+    }
+
+    public void setKunde(Kunde kunde) {
+        this.kunde = kunde;
+    }
+    
     public Long getId() {
         return id;
     }
@@ -54,5 +80,12 @@ public class Schrank implements Serializable {
     public String toString() {
         return "Schrank Nr. " + id + " ]";
     }
+
+    public Schrank(int schranknummer, Kunde kunde) {
+        this.schranknummer = schranknummer;
+        this.kunde = kunde;
+    }
     
+    public Schrank(){
+    }
 }

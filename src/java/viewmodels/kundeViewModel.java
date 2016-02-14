@@ -15,6 +15,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import models.KundeModel;
+import models.SchrankController;
 
 /**
  *
@@ -244,10 +245,18 @@ public class kundeViewModel implements Serializable{
         return konstanten.Navigation.CHECKIN;
     }
     
-    public String checkIn(){
-        this.eincheckNachricht = kundemodel.checkIn(id);
-        zuruecksetzen();
-        return konstanten.Navigation.EINGECHECKT;
+    public String checkIn(long id){
+        
+        //if(SchrankController.getInstance().einchecken(id) != -1){
+            this.eincheckNachricht = kundemodel.checkIn(id);
+            zuruecksetzen();
+            return konstanten.Navigation.EINGECHECKT;
+        /*}else{
+            
+            return konstanten.Navigation.EINGECHECKT;
+        }*/
+        
+        
     }
     
     public String checkOut(){

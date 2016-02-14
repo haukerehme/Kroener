@@ -10,8 +10,8 @@
         <h:form>
             <h:outputText id="CheckinseiteKundennummerAusgabe" value="Kundennummer eingeben: " />
             <h:inputText id="CheckinseiteKundennummerEingabefeld" value="#{kvm.id}"/>
-            <h:commandButton id="CheckinseiteCheckinButton" value="Check-In" action="#{kvm.checkIn()}" />
-            <br />
+            <h:commandButton id="CheckinseiteCheckinButton" value="Check-In" action="#{kvm.checkIn(kvm.id)}" />
+            <br/>
             <h:commandLink id="CheckinseiteStartseiteLink" value="Zum Hauptmenü" action="#{kvm.zurStartseite()}" />
         </h:form>
     </h:body>

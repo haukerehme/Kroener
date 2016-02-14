@@ -45,12 +45,17 @@ public class KundeModel implements Serializable{
         if(this.db.findKundeById(id).isEingecheckt()){
             return "Kunde ist bereits eingecheckt";
         }
-        if(this.db.findKundeById(id) == null){
+        else if(this.db.findKundeById(id) == null){
             return "Es existiert kein Kunde mit der eingegebenen Kundennummer (" + id + ")";
         }
         else{
-            this.db.einchecken(id);
-            return "Kunde erfolgreich eingecheckt";
+            int schranknummer = SchrankController.getInstance().einchecken(id);
+            if(schranknummer != -1){
+                this.db.einchecken(id);
+                return "Kunde erfolgreich eingecheckt. Schranknummer: " + schranknummer;
+            }else{
+                return "Kein Schrank mehr verfügbar";
+            }
         }
     }
     
